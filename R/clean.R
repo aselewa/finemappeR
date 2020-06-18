@@ -2,7 +2,7 @@
 
 
 RunCleaner <- function(sumstats, ColsToKeep){
-  if(!exists("bigsnp.1kg")){
+  if(!exists("bigSNP1kg")){
     stop('Please run declareGlobs() first.')
   }
   print('Loading summary statistics...')
@@ -14,12 +14,11 @@ RunCleaner <- function(sumstats, ColsToKeep){
   cleaned_sumstats <- clean_sumstats(sumstats, ColsToKeep)
   
   print('Matching to reference panel...')
-  bigsnp.1kg <- snp_attach(rdsfile = bigsnp.1kg)
-  cleaned_sumstats <- merge.bigsnp.gwas(cleaned_sumstats, bigsnp.1kg)
+  cleaned_sumstats <- merge.bigsnp.gwas(cleaned_sumstats, bigSNP = bigSNP1kg)
   
   print('Assining SNPs to LD blocks...')
-  ldBlocks <- readRDS('data/Euro_LD_Chunks.df.rds') 
-  cleaned_sumstats <- assign.locus.snp(cleaned.sumstats = cleaned_sumstats, ld = ldBlocks)
+  data('Euro_LD_Chunks', package='finemappeR')
+  cleaned_sumstats <- assign.locus.snp(cleaned.sumstats = cleaned_sumstats, ld = LD_Blocks)
   
   print('Complete.')
   

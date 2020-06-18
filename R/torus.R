@@ -53,12 +53,15 @@ RunTorus <- function(){
             'prior')
   
   res <- processx::run(command = TORUS, args = args, echo_cmd = TRUE, echo = TRUE)
-  enrich <- read.table(file = textConnection(res$stdout),skip=1,header=F,stringsAsFactors = F)
+  enrich <- as_tibble(read.table(file = textConnection(res$stdout),skip=1,header=F,stringsAsFactors = F))
   colnames(enrich) <- c("term", "estimate", "low", "high")
   
-  res2 <- processx::run(command = 'cat prior/*')
-  snp_pip <- read.table(file = textConnection(res2$stdout),skip=1,header=F,stringsAsFactors = F)
-  colnames(snp_pip) <- c("SNP","PIP")
+  files <- list.files(path = 'prior/', pattern = '*.prior', full.names = T)
+  res2 <- processx::run(command = 'cat', args=files)
+  snp_pip <- as_tibble(read.table(file = textConnection(res2$stdout),skip=1,header=F,stringsAsFactors = F))
+  colnames(snp_pip) <- c("snp","torus_pip")
+  
+  system('rm -rf prior/')
   
   return(list(enrich=enrich, snp_pip=snp_pip))
   
@@ -75,12 +78,13 @@ RunTorusFDR <- function(){
             '-annot', 
             '.temp/torus_annotations.txt.gz',
             '--load_zval',
-            '-qtl',
-            '.temp/qtl_file.txt')
+            '-qtl')
   
-  res <- processx::run(command = TORUS, args = paste0(args, collapse = ' '), echo_cmd = TRUE, echo = TRUE)
-  fdr_res <- readr::read_tsv(qtl_file,col_names = c("rej","region_id","fdr","decision"))
-  return(fdr_res)
+  res <- processx::run(command = TORUS, args = args, echo_cmd = TRUE, echo = TRUE)
+  torus_fdr <- as_tibble(read.table(file = textConnection(res$stdout),header=F,stringsAsFactors = F))
+  colnames(torus_fdr) <- c("rej","region_id","fdr","decision")
+
+  return(torus_fdr)
 }
 
 CleanTorusOutputs <- function(){

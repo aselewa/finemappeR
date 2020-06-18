@@ -1,6 +1,6 @@
 
 make_ranges <- function(seqname, start, end){
-  return(GRanges(seqnames = seqname, ranges = IRanges(start = start, end = end)))
+  return(GenomicRanges::GRanges(seqnames = seqname, ranges = IRanges::IRanges(start = start, end = end)))
 }
 
 # Cleans summary statistics and normalizes them for downstream analysis
@@ -56,17 +56,16 @@ assign.locus.snp <- function(cleaned.sumstats, ld){
   ldRanges <- make_ranges(ld$X1, ld$X2, ld$X3)
   ldRanges <- plyranges::mutate(ldRanges, locus=ld$X4)
   
-  snpRanges <- GRanges(seqnames = cleaned.sumstats$chr, 
-                       ranges   = IRanges(start = cleaned.sumstats$pos, 
-                                          end   = cleaned.sumstats$pos,
-                                          names = cleaned.sumstats$snp))
+  snpRanges <- make_ranges(seqname = cleaned.sumstats$chr, 
+                           start = cleaned.sumstats$pos, 
+                           end = cleaned.sumstats$pos)
   
-  snpRanges <- plyranges::mutate(snpRanges, snp=names(snpRanges))
+  snpRanges <- plyranges::mutate(snpRanges, snp=cleaned.sumstats$snp)
   
   snp.ld.overlap <- plyranges::join_overlap_inner(snpRanges, ldRanges)
   snp.ld.block <- as_tibble(snp.ld.overlap@elementMetadata)
   snp.ld.block <- snp.ld.block[!duplicated(snp.ld.block$snp), ] # some SNPs are in multiple ld-blocks due to edge of ld blocks
-  cleaned.annot.sumstats <- inner_join(cleaned.sumstats, snp.ld.block, 'snp')
+  cleaned.annot.sumstats <- dplyr::inner_join(cleaned.sumstats, snp.ld.block, 'snp')
   
   return(cleaned.annot.sumstats)
 }
@@ -82,10 +81,10 @@ annotator <- function(gwas, annotations){
     
     name <- paste0(basename(f),'_d')
     curr <- rtracklayer::import(f, format='bed')
-    subdf <- subsetByOverlaps(snpRanges, curr)
+    subdf <- IRanges::subsetByOverlaps(snpRanges, curr)
     snpsIn <- unique(subdf$snp)
     
-    gwas <- mutate(gwas, !!name := ifelse(snp %in% snpsIn,1,0))
+    gwas <- dplyr::mutate(gwas, !!name := ifelse(snp %in% snpsIn,1,0))
   }
   return(gwas)
 }
@@ -100,7 +99,7 @@ annotator_merged <- function(gwas, annotations){
   for(f in annotations){
     
     curr <- rtracklayer::import(f, format='bed')
-    subdf <- subsetByOverlaps(snpRanges, curr)
+    subdf <- IRanges::subsetByOverlaps(snpRanges, curr)
     snpsIn <- unique(subdf$snp)
     
     if(length(snpsIn)>0){
@@ -128,41 +127,22 @@ merge.bigsnp.gwas <- function(gwas, bigSNP){
   return(matched.gwas)
 }
 
-prune.regions <- function(sumstats, ref_panel){
-  
-  df_list <- list()
-  r2_thresh <- 0.1
-  for(l in unique(sumstats$locus)){
-    sub.sumstats <- sumstats[sumstats$locus == l, ]
-    
-    topSnpPos <- which.max(sub.sumstats$susie_pip)
-    topSnp <- sub.sumstats$bigSNP_index[topSnpPos]
-    topSnpG <- ref_panel$genotypes[ ,topSnp]
-    G <- ref_panel$genotypes[ , sub.sumstats$bigSNP_index]
-
-    r2 <- as.vector(cor(topSnpG, G, method = 'pearson'))
-    subRegions <- sub.sumstats[r2 > r2_thresh, ]
-    subRegions$r2 <- r2[r2>r2_thresh]
-    df_list[[l]] <- subRegions
-  }
-  return(Reduce(rbind, df_list))
-}
 
 # SUSIE related functions
 
-run.susie <- function(sumstats, ref_panel, ldchunk, L, prior){
+run.susie <- function(sumstats, bigSNP, ldchunk, L, prior){
   
   sub.sumstats <- sumstats[sumstats$locus == ldchunk, ]
   if(nrow(sub.sumstats) > 1){
-    X <- ref_panel$genotypes[ , sub.sumstats$bigSNP_index]
+    X <- bigSNP$genotypes[ , sub.sumstats$bigSNP_index]
     X <- scale(X, center = T, scale = T)
     zhat <- sub.sumstats$zscore
     R <- cov2cor((crossprod(X) + tcrossprod(zhat))/nrow(X))
     if(prior){
-      res <- susie_rss(z = zhat, prior_weights = sub.sumstats$torus_pip, R = R, L = L, check_z = FALSE)
+      res <- suppressWarnings(susieR::susie_rss(z = zhat, prior_weights = sub.sumstats$torus_pip, R = R, L = L, verbose = F))
     }
     else{
-      res <- susie_rss(z = zhat, R = R, L = L)
+      res <- suppressWarnings(susieR::susie_rss(z = zhat, R = R, L = L, verbose = F))
     }
     return(res)
   }
