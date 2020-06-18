@@ -1,9 +1,10 @@
 
-bigsnp.1kg <- '/project2/xinhe/1kg/bigsnpr/EUR_variable_1kg.rds'
-ldBlocks <- readRDS('data/Euro_LD_Chunks.df.rds') 
+
 
 RunCleaner <- function(sumstats, ColsToKeep){
-  
+  if(!exists("bigsnp.1kg")){
+    stop('Please run declareGlobs() first.')
+  }
   print('Loading summary statistics...')
   
   sumstats <- vroom::vroom(sumstats, col_names = TRUE)
@@ -17,6 +18,7 @@ RunCleaner <- function(sumstats, ColsToKeep){
   cleaned_sumstats <- merge.bigsnp.gwas(cleaned_sumstats, bigsnp.1kg)
   
   print('Assining SNPs to LD blocks...')
+  ldBlocks <- readRDS('data/Euro_LD_Chunks.df.rds') 
   cleaned_sumstats <- assign.locus.snp(cleaned.sumstats = cleaned_sumstats, ld = ldBlocks)
   
   print('Complete.')

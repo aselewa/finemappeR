@@ -15,8 +15,10 @@ findTorus <- function(path=NULL){
 
 findTorus('/project2/xinhe/software/dap/torus_src/torus')
 
-PrepareTorusFiles <- function(cleaned_sumstats, bed_annotations, ){
-  
+PrepareTorusFiles <- function(cleaned_sumstats, bed_annotations){
+  if(!exists("TORUS")){
+    stop('Please run declareGlobs() first.')
+  }
   stopifnot(dir.exists(bed_annotations))
   system('mkdir -p .temp')
   
@@ -79,4 +81,8 @@ RunTorusFDR <- function(){
   res <- processx::run(command = TORUS, args = paste0(args, collapse = ' '), echo_cmd = TRUE, echo = TRUE)
   fdr_res <- readr::read_tsv(qtl_file,col_names = c("rej","region_id","fdr","decision"))
   return(fdr_res)
+}
+
+CleanTorusOutputs <- function(){
+  system('rm -rf .temp')
 }

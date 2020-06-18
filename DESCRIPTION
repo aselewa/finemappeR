@@ -10,7 +10,7 @@ LazyData: true
 Depends:
     tidyverse,
     vroom,
-    bigsnpr
+    bigsnpr,
     data.table
 Remotes:
     stephenslab/susieR,
