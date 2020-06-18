@@ -1,0 +1,19 @@
+Package: finemappeR
+Title: Performs finemapping using Torus and Susie
+Version: 0.0.0.9000
+Authors@R: person("Alan", "Selewa", email = "selewa@uchicago.edu", role = c("aut", "cre"))
+Description: Performs finemapping with annotations
+Depends: R (>= 3.5.1)
+License: NA
+Encoding: UTF-8
+LazyData: true
+Depends:
+    tidyverse,
+    vroom,
+    bigsnpr
+    data.table
+Remotes:
+    stephenslab/susieR,
+    bioc::3.3/GenomicRanges,
+    bioc::3.3/plyranges,
+    bioc::3.3/rtracklayer
