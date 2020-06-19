@@ -32,4 +32,7 @@ Finemapping requires linkage-disequilibrium information. We utilize the `R` pack
 
 ### Vignettes
 
-* [Quick finemapping tutorial](https://aselewa.github.io/finemappeR/articles/quick_finemapping.html)
+* [Quick finemapping tutorial](https://aselewa.github.io/finemappeR/articles/quick_finemapping.html)  
+  
+  
+  
