@@ -22,14 +22,11 @@ PrepareSusieData <- function(sumstats, torus_pip, torus_fdr, fdr_thresh=0.1){
 #' @title RunFinemapping
 #' @description Runs SuSiE with L = 1
 #' @param sumstats a tibble or data frame containing raw summary statistics; must have header!
+#' @param bigSNP a bigsnpr object attached via bigsnpr::snp_attach()
 #' @param priortype string; one of "torus" or "uniform"
 #' @return list of finemapping results; one per LD block
 #' @export
-RunFinemapping <- function(sumstats, priortype = "torus"){
-  
-  if(!exists("bigSNP1kg")){
-    stop("Did you run declareGlobs()?")
-  }
+RunFinemapping <- function(sumstats, bigSNP, priortype = "torus"){
   
   stopifnot('torus_pip' %in% colnames(sumstats))
   chunks <- unique(sumstats$locus)
@@ -48,7 +45,7 @@ RunFinemapping <- function(sumstats, priortype = "torus"){
   for(z in seq_along(chunks)){
     print(paste0('Finemapping chunks.. ',z,' of ', length(chunks)))
     susie.df <- sumstats[sumstats$locus == z, ]
-    susie_res[[as.character(z)]] <- run.susie(susie.df, bigSNP1kg, z, L = 1, prior = usePrior)
+    susie_res[[as.character(z)]] <- run.susie(susie.df, bigSNP, z, L = 1, prior = usePrior)
   }
   
   return(susie_res)

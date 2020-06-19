@@ -4,10 +4,8 @@
 #' @param ColsToKeep character vector of the following columns: chr, position, allele1, allele2, beta, se, unique id, pvalue
 #' @return Cleaned summary statistics + LD block of every SNP, as well as its index in the reference panel of genotypes
 #' @export
-RunCleaner <- function(sumstats, ColsToKeep){
-  if(!exists("bigSNP1kg")){
-    stop('Please run declareGlobs() first.')
-  }
+RunCleaner <- function(sumstats, ColsToKeep, bigSNP){
+ 
   print('Loading summary statistics...')
   
   sumstats <- vroom::vroom(sumstats, col_names = TRUE)
@@ -17,7 +15,7 @@ RunCleaner <- function(sumstats, ColsToKeep){
   cleaned_sumstats <- clean_sumstats(sumstats, ColsToKeep)
   
   print('Matching to reference panel...')
-  cleaned_sumstats <- merge.bigsnp.gwas(cleaned_sumstats, bigSNP = bigSNP1kg)
+  cleaned_sumstats <- merge.bigsnp.gwas(cleaned_sumstats, bigSNP = bigSNP)
   
   print('Assining SNPs to LD blocks...')
   data('Euro_LD_Chunks', package='finemappeR')

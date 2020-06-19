@@ -75,17 +75,37 @@
 <h2 class="hasAnchor">
 <a href="#introducion" class="anchor"></a>Introducion</h2>
 <p>finemappeR is an R package that utilizes torus and susieR to perform functionally-informed genetic finemapping.</p>
-<p>If you are at UChicago with the He Lab, installation is easy:</p>
+<div id="dependencies" class="section level3">
+<h3 class="hasAnchor">
+<a href="#dependencies" class="anchor"></a>Dependencies</h3>
+<p>We recommend using <code>R &gt; 3.5</code> (has not been tested on older versions).</p>
+<p>The package depends on TORUS, an external C++ library. To ensure this package is compiled, your system must have the following C/C++ libraries are required for compiling the source code</p>
+<ul>
+<li>GNU GSL library</li>
+<li>Zlib library</li>
+<li>Boost C++ library</li>
+</ul>
+</div>
+<div id="install" class="section level3">
+<h3 class="hasAnchor">
+<a href="#install" class="anchor"></a>Install</h3>
+<p>Begin by installing this repo:</p>
 <pre><code><a href="https://rdrr.io/pkg/devtools/man/reexports.html">devtools::install_github('aselewa/finemappeR')</a></code></pre>
 <p>After installing, check that it loads properly:</p>
 <pre><code><a href="https://rdrr.io/pkg/finemappeR/man">library(finemappeR)</a></code></pre>
-<p>You can try to reproduce the vignette <a href="vignettes/quick_finemapping.html">here</a> to ensure all functions work.</p>
-<p>If you are an outside user, you must first install torus from here: <a href="https://github.com/xqwen/torus" class="uri">https://github.com/xqwen/torus</a> Place torus on your PATH or make a note of its location for later use.</p>
-<p>You will also need a genotype reference panel in PLINK format. We use the one readily available from 1000 Genomes Project. We utilize the R package <code>bigsnpr</code> to convert the PLINK files to <code>rds</code> for fast loading with <code><a href="https://rdrr.io/pkg/bigsnpr/man/snp_attach.html">bigsnpr::snp_attach()</a></code>. Note the location of this <code>rds</code> file.</p>
-<p>With these two in hand, we are set to load the package and perform finemapping.</p>
-<pre><code><a href="https://rdrr.io/pkg/finemappeR/man">library(finemappeR)
-defaultGlobs(bigSNP = path/to/bigsnp/rds, torus = path/to/torus)</a></code></pre>
-<p>You can try to reproduce the vignette to ensure all libraries were installed properly.</p>
+</div>
+<div id="reference-panel" class="section level3">
+<h3 class="hasAnchor">
+<a href="#reference-panel" class="anchor"></a>Reference panel</h3>
+<p>Finemapping requires linkage-disequilibrium information. We utilize the <code>R</code> package <code>bigsnpr</code> to read in PLINK files (bed/bim/fam) into <code>R</code> on the fly. If you have PLINK files, you can use <code><a href="https://rdrr.io/pkg/bigsnpr/man/snp_readBed.html">bigsnpr::snp_readBed()</a></code> to obtain a file with <code>.rds</code> extension. This RDS file is used for downstream analyses when attached with <code><a href="https://rdrr.io/pkg/bigsnpr/man/snp_attach.html">bigsnpr::snp_attach()</a></code>.</p>
+</div>
+<div id="vignettes" class="section level3">
+<h3 class="hasAnchor">
+<a href="#vignettes" class="anchor"></a>Vignettes</h3>
+<ul>
+<li><a href="https://aselewa.github.io/finemappeR/articles/quick_finemapping.html">Quick finemapping tutorial</a></li>
+</ul>
+</div>
 </div>
   </div>
 

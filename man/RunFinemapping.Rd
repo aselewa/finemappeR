@@ -4,10 +4,12 @@
 \alias{RunFinemapping}
 \title{RunFinemapping}
 \usage{
-RunFinemapping(sumstats, priortype = "torus")
+RunFinemapping(sumstats, bigSNP, priortype = "torus")
 }
 \arguments{
 \item{sumstats}{a tibble or data frame containing raw summary statistics; must have header!}
+
+\item{bigSNP}{a bigsnpr object attached via bigsnpr::snp_attach()}
 
 \item{priortype}{string; one of "torus" or "uniform"}
 }

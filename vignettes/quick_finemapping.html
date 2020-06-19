@@ -126,16 +126,15 @@ $(document).ready(function () {
 
 
 <pre class="r"><code>suppressMessages(library(finemappeR))</code></pre>
-<p>First thing we must do is run <code>declareGlobs()</code>. This function points us to required software and datasets. We need the location to TORUS, and to a genotype reference panel prepared by <code>bigsnpr</code>. If you are running this in the He lab, I have already declared their location by default, so simply running without any parameters will work. If you are on another system, you will need to supply these manually as arguments to <code>declareGlobs()</code>.</p>
-<pre class="r"><code>declareGlobs()</code></pre>
-<pre><code>## [1] &quot;Declaring global variables and attaching required datasets..&quot;
-## [1] &quot;Done&quot;</code></pre>
+<p>First thing we must do is attach our bigsnpr object. This is our reference panel of genotypes which we use to compute LD between SNPs. If you are in the He lab, you can just use the following chunk. Otherwise, you will need to obtain your own genotypes in PLINK format (bed/bim/fam) and use <code>bigsnpr::readBed()</code> to create the <code>.rds</code> file below.</p>
+<pre class="r"><code>bigSNP &lt;- bigsnpr::snp_attach(rdsfile = '/project2/xinhe/1kg/bigsnpr/EUR_variable_1kg.rds')</code></pre>
 <p>Here we show a quick run-through of <code>finemappeR</code> using a test summary statistics.</p>
 <p>First we run <code>RunCleaner()</code>, which takes our summary statistics in either tab or comma delimited. It also takes a character vector of the column names needed. The columns needed have to be given in the following order:</p>
 <p>You will need summary statistics with the following 8 columns: * chromosome (just the number, no “chr”, hg19!) * position (base pair position, hg19!) * beta (if you have Odds Ratio, you will need to transform it to log(Odds Ratio)) * standard error (SE) * reference allele (A,C,T,G) * association/effect allele (A,C,T,G) * some kind of SNP ID (rsID, or chr:position:a1:a2) * p-value</p>
 <pre class="r"><code>fpath &lt;- system.file(&quot;extdata&quot;, &quot;test_sumstats.txt.gz&quot;, package=&quot;finemappeR&quot;)
 gwas &lt;- RunCleaner(sumstats = fpath, 
-                   ColsToKeep = c('chr','position_b37','bcac_onco2_beta','bcac_onco2_se','a0','a1','phase3_1kg_id','bcac_onco2_P1df_Wald'))</code></pre>
+                   ColsToKeep = c('chr','position_b37','bcac_onco2_beta','bcac_onco2_se','a0','a1','phase3_1kg_id','bcac_onco2_P1df_Wald'),
+                   bigSNP = bigSNP)</code></pre>
 <pre><code>## [1] &quot;Loading summary statistics...&quot;</code></pre>
 <pre><code>## Observations: 9,999
 ## Variables: 14
@@ -174,8 +173,8 @@ gwas &lt;- RunCleaner(sumstats = fpath,
 ## [1] &quot;Done.&quot;</code></pre>
 <p>Now that the appropriate files have been generated (they are in .temp/), lets run TORUS. <code>RunTorus()</code> returns two things: enrichment level of each annotation in log2 units, and the posterior inclusion probability (PIP) of each SNP. These PIPs will be used as priors for finemapping.</p>
 <pre class="r"><code>torus.result &lt;- RunTorus()</code></pre>
-<pre><code>## Running /project2/xinhe/software/dap/torus_src/torus -d \
-##   .temp/torus_zscores.txt.gz -annot .temp/torus_annotations.txt.gz \
+<pre><code>## Running /home/selewa/R/x86_64-pc-linux-gnu-library/3.5/finemappeR/torus \
+##   -d .temp/torus_zscores.txt.gz -annot .temp/torus_annotations.txt.gz \
 ##   --load_zval -dump_prior prior
 ## Read in 2 loci, 7600 locus-SNP pairs ... 
 ## Loading annotations ... 
@@ -187,7 +186,7 @@ gwas &lt;- RunCleaner(sumstats = fpath,
 ##    3            -0.244          -10.132      0.969     -0.172      0.371  
 ##    4            -0.121          -10.702      1.345     -0.259      0.508  
 ##    5            -0.067          -11.228      1.726     -0.355      0.639  
-## Output priors ...
+## Output priors to directory prior...
 ## 
 ##                 Intercept    -11.228       -11.966    -10.490
 ##         Coding_UCSC.bed.1      0.002        -2.009      2.013
@@ -195,8 +194,8 @@ gwas &lt;- RunCleaner(sumstats = fpath,
 ##   Repressed_Hoffman.bed.1      0.002        -1.068      1.072</code></pre>
 <p>TORUS also gives us the uncertainty associated with whether each chunk contains a causal variant or not. We run <code>RunTorusFDR()</code> to get the probability of each chunk containing a causal variant. We can filter our chunks with low probability, thus saving us on computational time!</p>
 <pre class="r"><code>torus.fdr &lt;- RunTorusFDR()</code></pre>
-<pre><code>## Running /project2/xinhe/software/dap/torus_src/torus -d \
-##   .temp/torus_zscores.txt.gz -annot .temp/torus_annotations.txt.gz \
+<pre><code>## Running /home/selewa/R/x86_64-pc-linux-gnu-library/3.5/finemappeR/torus \
+##   -d .temp/torus_zscores.txt.gz -annot .temp/torus_annotations.txt.gz \
 ##   --load_zval -qtl
 ## Read in 2 loci, 7600 locus-SNP pairs ... 
 ## Loading annotations ... 
@@ -232,7 +231,7 @@ gwas &lt;- RunCleaner(sumstats = fpath,
 ## 10     1 15777 -0.0742  0.0638 1:15777:A:G       2.45e-1 -1.16    0.0000252
 ## # … with 7,589 more rows</code></pre>
 <p>With this data frame, we can perform finemapping. We use <code>RunFinemapping()</code> to get out results. This will be quite slow if chunks contain many SNPs( O(n^2) where n is # of SNPs). I am working on ways to parallize this step (maybe you can help!)</p>
-<pre class="r"><code>susie_finemap_L1 &lt;- RunFinemapping(sumstats = susie.df)</code></pre>
+<pre class="r"><code>susie_finemap_L1 &lt;- RunFinemapping(sumstats = susie.df, bigSNP = bigSNP)</code></pre>
 <pre><code>## [1] &quot;Finemapping chunks.. 1 of 2&quot;
 ## [1] &quot;Finemapping chunks.. 2 of 2&quot;</code></pre>
 <p><code>susie_finemap_L1</code> is a list of SuSiE results, one for each chunk/LD block. Usually we are just interested in the SuSiE PIP, which gives the probability of a SNP being causal. We can annotate our cleaned summary statistics with this information using <code>merge_susie_sumstats()</code></p>

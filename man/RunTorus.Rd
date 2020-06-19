@@ -4,7 +4,7 @@
 \alias{RunTorus}
 \title{RunTorus}
 \usage{
-RunTorus()
+RunTorus(TORUS = system.file("torus", package = "finemappeR"))
 }
 \value{
 list of enrichment results and PIP of each SNP (both tibbles)

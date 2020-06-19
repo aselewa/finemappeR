@@ -126,7 +126,7 @@
     
     </div>
 
-    <pre class="usage"><span class='fu'>RunFinemapping</span>(<span class='no'>sumstats</span>, <span class='kw'>priortype</span> <span class='kw'>=</span> <span class='st'>"torus"</span>)</pre>
+    <pre class="usage"><span class='fu'>RunFinemapping</span>(<span class='no'>sumstats</span>, <span class='no'>bigSNP</span>, <span class='kw'>priortype</span> <span class='kw'>=</span> <span class='st'>"torus"</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -134,6 +134,10 @@
     <tr>
       <th>sumstats</th>
       <td><p>a tibble or data frame containing raw summary statistics; must have header!</p></td>
+    </tr>
+    <tr>
+      <th>bigSNP</th>
+      <td><p>a bigsnpr object attached via bigsnpr::snp_attach()</p></td>
     </tr>
     <tr>
       <th>priortype</th>

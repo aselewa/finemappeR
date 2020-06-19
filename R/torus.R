@@ -1,22 +1,3 @@
-
-#' @title findTorus
-#' @description Finds torus if it has been added to the PATH variable
-#' @param path String denoting the full path to torus if known
-#' @return String; torus path
-#' @export
-findTorus <- function(path=NULL){
-  if(!is.null(path)){
-    TORUS <<- path
-  }
-  else{
-    path <- system("which torus", intern=TRUE)
-    if(length(path)==0){
-      stop('Torus could not be found and you did not provide a path to it. Make sure Torus is installed and it is in your PATH.')
-    }
-    TORUS <<- path
-  }
-}
-
 #' @title PrepareTorusFiles
 #' @description Prepares two files necessary for running torus: z-score file and annotations file
 #' @param cleaned_sumstats cleaned summary statistics from RunCleaner or other
@@ -25,9 +6,7 @@ findTorus <- function(path=NULL){
 #' @return NULL (results are written to disk in ./.temp)
 #' @export
 PrepareTorusFiles <- function(cleaned_sumstats, bed_annotations){
-  if(!exists("TORUS")){
-    stop('Please run declareGlobs() first.')
-  }
+  
   stopifnot(dir.exists(bed_annotations))
   system('mkdir -p .temp')
   
@@ -51,7 +30,7 @@ PrepareTorusFiles <- function(cleaned_sumstats, bed_annotations){
 #' @description executes Torus
 #' @return list of enrichment results and PIP of each SNP (both tibbles)
 #' @export
-RunTorus <- function(){
+RunTorus <- function(TORUS=system.file('torus', package='finemappeR')){
   
   if(!dir.exists('.temp')){
     stop('Cannot find annotation files. Did you run PrepareTorusfiles?')
@@ -84,7 +63,7 @@ RunTorus <- function(){
 #' @description Runs Torus in FDR mode to estimate the FDR of each chunk containing a causal variant
 #' @return tibble containing fdr of each LD block/chunk
 #' @export
-RunTorusFDR <- function(){
+RunTorusFDR <- function(TORUS=system.file('torus', package='finemappeR')){
   
   if(!dir.exists('.temp')){
     stop('Cannot find annotation files. Did you run PrepareTorusfiles?')

@@ -83,16 +83,15 @@
     
     
 <div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/message.html">suppressMessages</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">finemappeR</span>))</pre></body></html></div>
-<p>First thing we must do is run <code><a href="../reference/declareGlobs.html">declareGlobs()</a></code>. This function points us to required software and datasets. We need the location to TORUS, and to a genotype reference panel prepared by <code>bigsnpr</code>. If you are running this in the He lab, I have already declared their location by default, so simply running without any parameters will work. If you are on another system, you will need to supply these manually as arguments to <code><a href="../reference/declareGlobs.html">declareGlobs()</a></code>.</p>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="../reference/declareGlobs.html">declareGlobs</a></span>()</pre></body></html></div>
-<pre><code>## [1] "Declaring global variables and attaching required datasets.."
-## [1] "Done"</code></pre>
+<p>First thing we must do is attach our bigsnpr object. This is our reference panel of genotypes which we use to compute LD between SNPs. If you are in the He lab, you can just use the following chunk. Otherwise, you will need to obtain your own genotypes in PLINK format (bed/bim/fam) and use <code>bigsnpr::readBed()</code> to create the <code>.rds</code> file below.</p>
+<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="no">bigSNP</span> <span class="kw">&lt;-</span> <span class="kw pkg">bigsnpr</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigsnpr/man/snp_attach.html">snp_attach</a></span>(<span class="kw">rdsfile</span> <span class="kw">=</span> <span class="st">'/project2/xinhe/1kg/bigsnpr/EUR_variable_1kg.rds'</span>)</pre></body></html></div>
 <p>Here we show a quick run-through of <code>finemappeR</code> using a test summary statistics.</p>
 <p>First we run <code><a href="../reference/RunCleaner.html">RunCleaner()</a></code>, which takes our summary statistics in either tab or comma delimited. It also takes a character vector of the column names needed. The columns needed have to be given in the following order:</p>
 <p>You will need summary statistics with the following 8 columns: * chromosome (just the number, no “chr”, hg19!) * position (base pair position, hg19!) * beta (if you have Odds Ratio, you will need to transform it to log(Odds Ratio)) * standard error (SE) * reference allele (A,C,T,G) * association/effect allele (A,C,T,G) * some kind of SNP ID (rsID, or chr:position:a1:a2) * p-value</p>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">fpath</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span>(<span class="st">"extdata"</span>, <span class="st">"test_sumstats.txt.gz"</span>, <span class="kw">package</span><span class="kw">=</span><span class="st">"finemappeR"</span>)
+<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="no">fpath</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span>(<span class="st">"extdata"</span>, <span class="st">"test_sumstats.txt.gz"</span>, <span class="kw">package</span><span class="kw">=</span><span class="st">"finemappeR"</span>)
 <span class="no">gwas</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/RunCleaner.html">RunCleaner</a></span>(<span class="kw">sumstats</span> <span class="kw">=</span> <span class="no">fpath</span>,
-                   <span class="kw">ColsToKeep</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'chr'</span>,<span class="st">'position_b37'</span>,<span class="st">'bcac_onco2_beta'</span>,<span class="st">'bcac_onco2_se'</span>,<span class="st">'a0'</span>,<span class="st">'a1'</span>,<span class="st">'phase3_1kg_id'</span>,<span class="st">'bcac_onco2_P1df_Wald'</span>))</pre></body></html></div>
+                   <span class="kw">ColsToKeep</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'chr'</span>,<span class="st">'position_b37'</span>,<span class="st">'bcac_onco2_beta'</span>,<span class="st">'bcac_onco2_se'</span>,<span class="st">'a0'</span>,<span class="st">'a1'</span>,<span class="st">'phase3_1kg_id'</span>,<span class="st">'bcac_onco2_P1df_Wald'</span>),
+                   <span class="kw">bigSNP</span> <span class="kw">=</span> <span class="no">bigSNP</span>)</pre></body></html></div>
 <pre><code>## [1] "Loading summary statistics..."</code></pre>
 <pre><code>## Observations: 9,999
 ## Variables: 14
@@ -109,7 +108,7 @@
 <pre><code>## [1] "Assining SNPs to LD blocks..."
 ## [1] "Complete."</code></pre>
 <p>Check that the output is cleaned and has appropriate columns:</p>
-<div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="no">gwas</span>[,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'chr'</span>,<span class="st">'pos'</span>,<span class="st">'beta'</span>,<span class="st">'se'</span>,<span class="st">'snp'</span>,<span class="st">'pval'</span>,<span class="st">'zscore'</span>)]</pre></body></html></div>
+<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="no">gwas</span>[,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'chr'</span>,<span class="st">'pos'</span>,<span class="st">'beta'</span>,<span class="st">'se'</span>,<span class="st">'snp'</span>,<span class="st">'pval'</span>,<span class="st">'zscore'</span>)]</pre></body></html></div>
 <pre><code>## # A tibble: 7,600 x 7
 ##      chr   pos     beta     se snp                       pval   zscore
 ##    &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;                    &lt;dbl&gt;    &lt;dbl&gt;
@@ -125,14 +124,14 @@
 ## 10     1 15774  0.265   0.0935 rs374029747:15774:G:A 0.00463   2.83   
 ## # ... with 7,590 more rows</code></pre>
 <p>Next, we must perform enrichment analysis with TORUS, which requires annotation files in <code>.bed</code> format. Use the <code><a href="../reference/PrepareTorusFiles.html">PrepareTorusFiles()</a></code> function, which takes the previous output, and a directory with bed files. Your bed file should contain only 3 columns (chr, start, end) and chromosomes should be just the number (no “chr”). Currently only hg19/b37 coordinates are accepted. You will get wrong results if you use hg38/other.</p>
-<div class="sourceCode" id="cb14"><html><body><pre class="r"><span class="fu"><a href="../reference/PrepareTorusFiles.html">PrepareTorusFiles</a></span>(<span class="no">gwas</span>, <span class="kw">bed_annotations</span> <span class="kw">=</span> <span class="st">'/project2/xinhe/alan/Cancer/GERMLINE/ANNOTATIONS/TEST/'</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="fu"><a href="../reference/PrepareTorusFiles.html">PrepareTorusFiles</a></span>(<span class="no">gwas</span>, <span class="kw">bed_annotations</span> <span class="kw">=</span> <span class="st">'/project2/xinhe/alan/Cancer/GERMLINE/ANNOTATIONS/TEST/'</span>)</pre></body></html></div>
 <pre><code>## [1] "Annotating Snps.."
 ## [1] "Writing files to temporary location.."
 ## [1] "Done."</code></pre>
 <p>Now that the appropriate files have been generated (they are in .temp/), lets run TORUS. <code><a href="../reference/RunTorus.html">RunTorus()</a></code> returns two things: enrichment level of each annotation in log2 units, and the posterior inclusion probability (PIP) of each SNP. These PIPs will be used as priors for finemapping.</p>
-<div class="sourceCode" id="cb16"><html><body><pre class="r"><span class="no">torus.result</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/RunTorus.html">RunTorus</a></span>()</pre></body></html></div>
-<pre><code>## Running /project2/xinhe/software/dap/torus_src/torus -d \
-##   .temp/torus_zscores.txt.gz -annot .temp/torus_annotations.txt.gz \
+<div class="sourceCode" id="cb15"><html><body><pre class="r"><span class="no">torus.result</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/RunTorus.html">RunTorus</a></span>()</pre></body></html></div>
+<pre><code>## Running /home/selewa/R/x86_64-pc-linux-gnu-library/3.5/finemappeR/torus \
+##   -d .temp/torus_zscores.txt.gz -annot .temp/torus_annotations.txt.gz \
 ##   --load_zval -dump_prior prior
 ## Read in 2 loci, 7600 locus-SNP pairs ... 
 ## Loading annotations ... 
@@ -144,16 +143,16 @@
 ##    3            -0.244          -10.132      0.969     -0.172      0.371  
 ##    4            -0.121          -10.702      1.345     -0.259      0.508  
 ##    5            -0.067          -11.228      1.726     -0.355      0.639  
-## Output priors ...
+## Output priors to directory prior...
 ## 
 ##                 Intercept    -11.228       -11.966    -10.490
 ##         Coding_UCSC.bed.1      0.002        -2.009      2.013
 ## Conserved_LindbladToh.bed.1     -0.354       -20.373     19.665
 ##   Repressed_Hoffman.bed.1      0.002        -1.068      1.072</code></pre>
 <p>TORUS also gives us the uncertainty associated with whether each chunk contains a causal variant or not. We run <code><a href="../reference/RunTorusFDR.html">RunTorusFDR()</a></code> to get the probability of each chunk containing a causal variant. We can filter our chunks with low probability, thus saving us on computational time!</p>
-<div class="sourceCode" id="cb18"><html><body><pre class="r"><span class="no">torus.fdr</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/RunTorusFDR.html">RunTorusFDR</a></span>()</pre></body></html></div>
-<pre><code>## Running /project2/xinhe/software/dap/torus_src/torus -d \
-##   .temp/torus_zscores.txt.gz -annot .temp/torus_annotations.txt.gz \
+<div class="sourceCode" id="cb17"><html><body><pre class="r"><span class="no">torus.fdr</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/RunTorusFDR.html">RunTorusFDR</a></span>()</pre></body></html></div>
+<pre><code>## Running /home/selewa/R/x86_64-pc-linux-gnu-library/3.5/finemappeR/torus \
+##   -d .temp/torus_zscores.txt.gz -annot .temp/torus_annotations.txt.gz \
 ##   --load_zval -qtl
 ## Read in 2 loci, 7600 locus-SNP pairs ... 
 ## Loading annotations ... 
@@ -171,9 +170,9 @@
 ##     1                     1    9.350e-01    0
 ##     2                     2    9.736e-01    0</code></pre>
 <p>Lets add the TORUS results back onto our cleaned summary statistics. <code><a href="../reference/PrepareSusieData.html">PrepareSusieData()</a></code> takes a parameter called <code>fdr_thresh</code> which is the FDR associated with each chunk. This value is 10% by default, and chunks with FDR &lt; 10% are removed. I set it to 1 here just to keep all chunks but you will want to lower this or just use default.</p>
-<div class="sourceCode" id="cb20"><html><body><pre class="r"><span class="no">susie.df</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/PrepareSusieData.html">PrepareSusieData</a></span>(<span class="kw">sumstats</span> <span class="kw">=</span> <span class="no">gwas</span>, <span class="kw">torus_pip</span> <span class="kw">=</span> <span class="no">torus.result</span>$<span class="no">snp_pip</span>, <span class="kw">torus_fdr</span> <span class="kw">=</span> <span class="no">torus.fdr</span>, <span class="kw">fdr_thresh</span> <span class="kw">=</span> <span class="fl">1</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb19"><html><body><pre class="r"><span class="no">susie.df</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/PrepareSusieData.html">PrepareSusieData</a></span>(<span class="kw">sumstats</span> <span class="kw">=</span> <span class="no">gwas</span>, <span class="kw">torus_pip</span> <span class="kw">=</span> <span class="no">torus.result</span>$<span class="no">snp_pip</span>, <span class="kw">torus_fdr</span> <span class="kw">=</span> <span class="no">torus.fdr</span>, <span class="kw">fdr_thresh</span> <span class="kw">=</span> <span class="fl">1</span>)</pre></body></html></div>
 <p>We see we have a new column called <code>torus_pip</code></p>
-<div class="sourceCode" id="cb21"><html><body><pre class="r"><span class="no">susie.df</span>[,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'chr'</span>,<span class="st">'pos'</span>,<span class="st">'beta'</span>,<span class="st">'se'</span>,<span class="st">'snp'</span>,<span class="st">'pval'</span>,<span class="st">'zscore'</span>,<span class="st">'torus_pip'</span>)]</pre></body></html></div>
+<div class="sourceCode" id="cb20"><html><body><pre class="r"><span class="no">susie.df</span>[,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'chr'</span>,<span class="st">'pos'</span>,<span class="st">'beta'</span>,<span class="st">'se'</span>,<span class="st">'snp'</span>,<span class="st">'pval'</span>,<span class="st">'zscore'</span>,<span class="st">'torus_pip'</span>)]</pre></body></html></div>
 <pre><code>## # A tibble: 7,599 x 8
 ##      chr   pos     beta     se snp                  pval   zscore torus_pip
 ##    &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;               &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
@@ -189,13 +188,13 @@
 ## 10     1 15777 -0.0742  0.0638 1:15777:A:G       2.45e-1 -1.16    0.0000252
 ## # ... with 7,589 more rows</code></pre>
 <p>With this data frame, we can perform finemapping. We use <code><a href="../reference/RunFinemapping.html">RunFinemapping()</a></code> to get out results. This will be quite slow if chunks contain many SNPs( O(n^2) where n is # of SNPs). I am working on ways to parallize this step (maybe you can help!)</p>
-<div class="sourceCode" id="cb23"><html><body><pre class="r"><span class="no">susie_finemap_L1</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/RunFinemapping.html">RunFinemapping</a></span>(<span class="kw">sumstats</span> <span class="kw">=</span> <span class="no">susie.df</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb22"><html><body><pre class="r"><span class="no">susie_finemap_L1</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/RunFinemapping.html">RunFinemapping</a></span>(<span class="kw">sumstats</span> <span class="kw">=</span> <span class="no">susie.df</span>, <span class="kw">bigSNP</span> <span class="kw">=</span> <span class="no">bigSNP</span>)</pre></body></html></div>
 <pre><code>## [1] "Finemapping chunks.. 1 of 2"
 ## [1] "Finemapping chunks.. 2 of 2"</code></pre>
 <p><code>susie_finemap_L1</code> is a list of SuSiE results, one for each chunk/LD block. Usually we are just interested in the SuSiE PIP, which gives the probability of a SNP being causal. We can annotate our cleaned summary statistics with this information using <code>merge_susie_sumstats()</code></p>
-<div class="sourceCode" id="cb25"><html><body><pre class="r"><span class="no">gwas_finemapped</span> <span class="kw">&lt;-</span> <span class="fu">merge_susie_sumstats</span>(<span class="kw">susie_results</span> <span class="kw">=</span> <span class="no">susie_finemap_L1</span>, <span class="kw">sumstats</span> <span class="kw">=</span> <span class="no">susie.df</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb24"><html><body><pre class="r"><span class="no">gwas_finemapped</span> <span class="kw">&lt;-</span> <span class="fu">merge_susie_sumstats</span>(<span class="kw">susie_results</span> <span class="kw">=</span> <span class="no">susie_finemap_L1</span>, <span class="kw">sumstats</span> <span class="kw">=</span> <span class="no">susie.df</span>)</pre></body></html></div>
 <p>Lets look at the final cleaned, and finemapped summary statistics. We see we have a new column called <code>susie_pip</code> which is the probability of being causal. Note that we ran SuSiE with L = 1 here, meaning we assumed there is at most 1 causal variant per SNP.</p>
-<div class="sourceCode" id="cb26"><html><body><pre class="r"><span class="no">gwas_finemapped</span>[,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'chr'</span>,<span class="st">'pos'</span>,<span class="st">'beta'</span>,<span class="st">'se'</span>,<span class="st">'snp'</span>,<span class="st">'pval'</span>,<span class="st">'zscore'</span>,<span class="st">'torus_pip'</span>,<span class="st">'susie_pip'</span>)]</pre></body></html></div>
+<div class="sourceCode" id="cb25"><html><body><pre class="r"><span class="no">gwas_finemapped</span>[,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'chr'</span>,<span class="st">'pos'</span>,<span class="st">'beta'</span>,<span class="st">'se'</span>,<span class="st">'snp'</span>,<span class="st">'pval'</span>,<span class="st">'zscore'</span>,<span class="st">'torus_pip'</span>,<span class="st">'susie_pip'</span>)]</pre></body></html></div>
 <pre><code>## # A tibble: 7,599 x 9
 ##      chr   pos     beta     se snp        pval   zscore torus_pip susie_pip
 ##    &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;

@@ -4,7 +4,7 @@
 \alias{RunTorusFDR}
 \title{RunTorusFDR}
 \usage{
-RunTorusFDR()
+RunTorusFDR(TORUS = system.file("torus", package = "finemappeR"))
 }
 \value{
 tibble containing fdr of each LD block/chunk

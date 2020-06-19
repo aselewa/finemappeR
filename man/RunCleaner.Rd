@@ -4,7 +4,7 @@
 \alias{RunCleaner}
 \title{RunCleaner}
 \usage{
-RunCleaner(sumstats, ColsToKeep)
+RunCleaner(sumstats, ColsToKeep, bigSNP)
 }
 \arguments{
 \item{sumstats}{a tibble or data frame containing raw summary statistics. Coordinates should be hg39/b37; the pipeline does not support hg38.}
