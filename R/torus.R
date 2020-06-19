@@ -3,6 +3,7 @@
 #' @description Finds torus if it has been added to the PATH variable
 #' @param path String denoting the full path to torus if known
 #' @return String; torus path
+#' @export
 findTorus <- function(path=NULL){
   if(!is.null(path)){
     TORUS <<- path
@@ -22,6 +23,7 @@ findTorus <- function(path=NULL){
 #' @param bed_annotation a directory containing annotations in bed format. The bed file must have three columns: chr, start, end. Chromosomes should be numeric (no "chr")
 #' and should be in hg19/b37 format. You will get wrong results if you use hg38 or other (reference panel is hg19).
 #' @return NULL (results are written to disk in ./.temp)
+#' @export
 PrepareTorusFiles <- function(cleaned_sumstats, bed_annotations){
   if(!exists("TORUS")){
     stop('Please run declareGlobs() first.')
@@ -48,6 +50,7 @@ PrepareTorusFiles <- function(cleaned_sumstats, bed_annotations){
 #' @title RunTorus
 #' @description executes Torus
 #' @return list of enrichment results and PIP of each SNP (both tibbles)
+#' @export
 RunTorus <- function(){
   
   if(!dir.exists('.temp')){
@@ -80,6 +83,7 @@ RunTorus <- function(){
 #' @title RunTorusFDR
 #' @description Runs Torus in FDR mode to estimate the FDR of each chunk containing a causal variant
 #' @return tibble containing fdr of each LD block/chunk
+#' @export
 RunTorusFDR <- function(){
   
   if(!dir.exists('.temp')){

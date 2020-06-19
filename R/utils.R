@@ -1,8 +1,9 @@
+#' @export
 make_ranges <- function(seqname, start, end){
   return(GenomicRanges::GRanges(seqnames = seqname, ranges = IRanges::IRanges(start = start, end = end)))
 }
 
-# Cleans summary statistics and normalizes them for downstream analysis
+#' @export
 clean_sumstats <- function(sumstats, cols.to.keep){
   
   stopifnot(!is.null(sumstats))
@@ -50,6 +51,7 @@ clean_sumstats <- function(sumstats, cols.to.keep){
 }
 
 # Assigns each SNP to one ld-block
+#' @export
 assign.locus.snp <- function(cleaned.sumstats, ld){
   
   ldRanges <- make_ranges(ld$X1, ld$X2, ld$X3)
@@ -71,6 +73,7 @@ assign.locus.snp <- function(cleaned.sumstats, ld){
 
 
 # Each annotation gets assigned SNPs based on overlap
+#' @export
 annotator <- function(gwas, annotations){
   
   snpRanges <- make_ranges(gwas$chr, gwas$pos, gwas$pos)
@@ -89,6 +92,7 @@ annotator <- function(gwas, annotations){
 }
 
 # Annotations for causal SNPs (apply these after fine-mapping!)
+#' @export
 annotator_merged <- function(gwas, annotations){
   
   snpRanges <- make_ranges(gwas$chr, gwas$pos, gwas$pos)
@@ -111,7 +115,7 @@ annotator_merged <- function(gwas, annotations){
   }
   return(gwas)
 }
-
+#' @export
 merge.bigsnp.gwas <- function(gwas, bigSNP){
   
   map <- bigSNP$map
@@ -128,7 +132,7 @@ merge.bigsnp.gwas <- function(gwas, bigSNP){
 
 
 # SUSIE related functions
-
+#' @export
 run.susie <- function(sumstats, bigSNP, ldchunk, L, prior){
   
   sub.sumstats <- sumstats[sumstats$locus == ldchunk, ]
@@ -148,7 +152,8 @@ run.susie <- function(sumstats, bigSNP, ldchunk, L, prior){
 }
 
 # merges susie results with original summary statistics data frame
-# ASSUMES L = 1! ONLY ONE CREDIBLE SET PER LOCUS! 
+# ASSUMES L = 1! ONLY ONE CREDIBLE SET PER LOCUS!
+#' @export
 merge_susie_sumstats <- function(susie_results, sumstats){
   
   sumstats$susie_pip <- 0
