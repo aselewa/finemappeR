@@ -17,3 +17,4 @@ Remotes:
     bioc::3.3/GenomicRanges,
     bioc::3.3/plyranges,
     bioc::3.3/rtracklayer
+RoxygenNote: 7.1.0

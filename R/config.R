@@ -1,4 +1,9 @@
 
+#' @title declareGlobs()
+#' @description Sets global variants: location of torus executable and location of reference panel rds file
+#' @param bigsnp string denoting path to reference panel in rds format (converted from PLINK using bigsnpr::add_bed)
+#' @param torus location of torus executable
+#' @return NULL
 declareGlobs <- function(bigsnp=NULL, torus=NULL){
   
   print('Declaring global variables and attaching required datasets..')

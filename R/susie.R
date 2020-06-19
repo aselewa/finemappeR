@@ -1,5 +1,10 @@
 
-
+#' @title PrepareSusieData
+#' @description Adds torus results to cleaned summary statistics
+#' @param sumstats a tibble or data frame containing raw summary statistics
+#' @param torus_pip a tibble containing PIP of each SNP (result from RunTorus)
+#' @param torus_fdr a tibble containing the FDR of each region (result from RunTorusFDR)
+#' @return tibble of summary statistics updated with torus output
 PrepareSusieData <- function(sumstats, torus_pip, torus_fdr, fdr_thresh=0.1){
   
   # keep loci at fdr_thresh FDR (10% by default)
@@ -13,6 +18,11 @@ PrepareSusieData <- function(sumstats, torus_pip, torus_fdr, fdr_thresh=0.1){
   
 }
 
+#' @title RunFinemapping
+#' @description Runs SuSiE with L = 1
+#' @param sumstats a tibble or data frame containing raw summary statistics; must have header!
+#' @param priortype string; one of "torus" or "uniform"
+#' @return list of finemapping results; one per LD block
 RunFinemapping <- function(sumstats, priortype = "torus"){
   
   if(!exists("bigSNP1kg")){

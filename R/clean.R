@@ -1,6 +1,8 @@
-
-
-
+#' @title RunCleaner
+#' @description Cleans GWAS summary statistics and adds metadata
+#' @param sumstats a tibble or data frame containing raw summary statistics. Coordinates should be hg39/b37; the pipeline does not support hg38.
+#' @param ColsToKeep character vector of the following columns: chr, position, allele1, allele2, beta, se, unique id, pvalue
+#' @return Cleaned summary statistics + LD block of every SNP, as well as its index in the reference panel of genotypes
 RunCleaner <- function(sumstats, ColsToKeep){
   if(!exists("bigSNP1kg")){
     stop('Please run declareGlobs() first.')

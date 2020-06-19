@@ -1,4 +1,3 @@
-
 make_ranges <- function(seqname, start, end){
   return(GenomicRanges::GRanges(seqnames = seqname, ranges = IRanges::IRanges(start = start, end = end)))
 }
