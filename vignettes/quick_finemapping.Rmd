@@ -1,5 +1,7 @@
 ---
-title: "FinemappeR Demo"
+title: "finemappeR Tutorial"
+author: Alan Selewa
+data: 06/19/2020
 output: html_document
 ---
 
@@ -7,11 +9,9 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
-suppressMessages(library(finemappeR))
-```
+Welcome to this tutorial where we perform finemapping on a small GWAS dataset that is included with this package. Try to reproduce this analysis to ensure everything is installed properly.
 
-First thing we must do is attach our bigsnpr object. This is our reference panel of genotypes which we use to compute LD between SNPs. If you are in the He lab, you can just use the following chunk. Otherwise, you will need to obtain your own genotypes in PLINK format (bed/bim/fam) and use `bigsnpr::readBed()` to create the `.rds` file below.
+We begin by attaching our `bigsnpr` object. This is our reference panel of genotypes which we use to compute LD between SNPs. If you are in the He lab, you can just use the following chunk. Otherwise, you will need to obtain your own genotypes in PLINK format (bed/bim/fam) and use `bigsnpr::readBed()` to create the `.rds` file below.
 
 ```{r}
 bigSNP <- bigsnpr::snp_attach(rdsfile = '/project2/xinhe/1kg/bigsnpr/EUR_variable_1kg.rds')
@@ -32,6 +32,8 @@ First we run `RunCleaner()`, which takes our summary statistics in either tab or
 * p-value  
   
 ```{r}
+library(finemappeR)
+
 fpath <- system.file("extdata", "test_sumstats.txt.gz", package="finemappeR")
 gwas <- RunCleaner(sumstats = fpath, 
                    ColsToKeep = c('chr','position_b37','bcac_onco2_beta','bcac_onco2_se','a0','a1','phase3_1kg_id','bcac_onco2_P1df_Wald'),
