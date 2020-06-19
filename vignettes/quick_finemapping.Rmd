@@ -20,9 +20,8 @@ bigSNP <- bigsnpr::snp_attach(rdsfile = '/project2/xinhe/1kg/bigsnpr/EUR_variabl
 
 Here we show a quick run-through of `finemappeR` using a test summary statistics.
 
-First we run `RunCleaner()`, which takes our summary statistics in either tab or comma delimited. It also takes a character vector of the column names needed. The columns needed have to be given in the following order:
-
-You will need summary statistics with the following 8 columns:
+First we run `RunCleaner()`, which takes our summary statistics in either tab or comma delimited. It also takes a character vector of the 8 column names needed. The columns needed have to be given in the following order:  
+  
 * chromosome (just the number, no "chr", hg19!)  
 * position (base pair position, hg19!)  
 * beta (if you have Odds Ratio, you will need to transform it to log(Odds Ratio))  
@@ -31,7 +30,7 @@ You will need summary statistics with the following 8 columns:
 * association/effect allele (A,C,T,G)  
 * some kind of SNP ID (rsID, or chr:position:a1:a2)  
 * p-value  
-
+  
 ```{r}
 fpath <- system.file("extdata", "test_sumstats.txt.gz", package="finemappeR")
 gwas <- RunCleaner(sumstats = fpath, 

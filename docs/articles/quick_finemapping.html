@@ -86,15 +86,24 @@
 <p>First thing we must do is attach our bigsnpr object. This is our reference panel of genotypes which we use to compute LD between SNPs. If you are in the He lab, you can just use the following chunk. Otherwise, you will need to obtain your own genotypes in PLINK format (bed/bim/fam) and use <code>bigsnpr::readBed()</code> to create the <code>.rds</code> file below.</p>
 <div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="no">bigSNP</span> <span class="kw">&lt;-</span> <span class="kw pkg">bigsnpr</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigsnpr/man/snp_attach.html">snp_attach</a></span>(<span class="kw">rdsfile</span> <span class="kw">=</span> <span class="st">'/project2/xinhe/1kg/bigsnpr/EUR_variable_1kg.rds'</span>)</pre></body></html></div>
 <p>Here we show a quick run-through of <code>finemappeR</code> using a test summary statistics.</p>
-<p>First we run <code><a href="../reference/RunCleaner.html">RunCleaner()</a></code>, which takes our summary statistics in either tab or comma delimited. It also takes a character vector of the column names needed. The columns needed have to be given in the following order:</p>
-<p>You will need summary statistics with the following 8 columns: * chromosome (just the number, no “chr”, hg19!)<br>
-* position (base pair position, hg19!)<br>
-* beta (if you have Odds Ratio, you will need to transform it to log(Odds Ratio))<br>
-* standard error (SE)<br>
-* reference allele (A,C,T,G)<br>
-* association/effect allele (A,C,T,G)<br>
-* some kind of SNP ID (rsID, or chr:position:a1:a2)<br>
-* p-value</p>
+<p>First we run <code><a href="../reference/RunCleaner.html">RunCleaner()</a></code>, which takes our summary statistics in either tab or comma delimited. It also takes a character vector of the 8 column names needed. The columns needed have to be given in the following order:</p>
+<ul>
+<li>chromosome (just the number, no “chr”, hg19!)<br>
+</li>
+<li>position (base pair position, hg19!)<br>
+</li>
+<li>beta (if you have Odds Ratio, you will need to transform it to log(Odds Ratio))<br>
+</li>
+<li>standard error (SE)<br>
+</li>
+<li>reference allele (A,C,T,G)<br>
+</li>
+<li>association/effect allele (A,C,T,G)<br>
+</li>
+<li>some kind of SNP ID (rsID, or chr:position:a1:a2)<br>
+</li>
+<li>p-value</li>
+</ul>
 <div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="no">fpath</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span>(<span class="st">"extdata"</span>, <span class="st">"test_sumstats.txt.gz"</span>, <span class="kw">package</span><span class="kw">=</span><span class="st">"finemappeR"</span>)
 <span class="no">gwas</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/RunCleaner.html">RunCleaner</a></span>(<span class="kw">sumstats</span> <span class="kw">=</span> <span class="no">fpath</span>,
                    <span class="kw">ColsToKeep</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'chr'</span>,<span class="st">'position_b37'</span>,<span class="st">'bcac_onco2_beta'</span>,<span class="st">'bcac_onco2_se'</span>,<span class="st">'a0'</span>,<span class="st">'a1'</span>,<span class="st">'phase3_1kg_id'</span>,<span class="st">'bcac_onco2_P1df_Wald'</span>),
