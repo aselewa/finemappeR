@@ -125,7 +125,7 @@ merge.bigsnp.gwas <- function(gwas, bigSNP){
   matched.gwas <- as_tibble(bigsnpr::snp_match(gwas, 
                                                snp_info, 
                                                strand_flip = T, 
-                                               match.min.prop = 1)) %>% dplyr::rename(og_index = `_NUM_ID_.ss`) %>% dplyr::rename(bigSNP_index = `_NUM_ID_`) %>% mutate(zscore = beta/se)
+                                               match.min.prop = 0.1)) %>% dplyr::rename(og_index = `_NUM_ID_.ss`) %>% dplyr::rename(bigSNP_index = `_NUM_ID_`) %>% mutate(zscore = beta/se)
   
   return(matched.gwas)
 }
