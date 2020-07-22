@@ -20,8 +20,8 @@ PrepareTorusFiles <- function(cleaned_sumstats, bed_annotations){
   cleaned.gwas.annots <- annotator(cleaned_sumstats, annotations = annotations)
   
   print('Writing files to temporary location..')
-  data.table::fwrite(x = cleaned.gwas.annots[,-c(1:6,8:12)], file = '.temp/torus_annotations.txt.gz', quote = F, sep = '\t', col.names = T, row.names = F)
-  data.table::fwrite(x = cleaned_sumstats[,c('snp','locus','zscore')], file = '.temp/torus_zscores.txt.gz', quote = F, sep = '\t', col.names = T, row.names = F)
+  readr::write_tsv(x = cleaned.gwas.annots[,-c(1:6,8:12)], path = '.temp/torus_annotations.txt.gz', col_names = T)
+  readr::write_tsv(x = cleaned_sumstats[,c('snp','locus','zscore')], path = '.temp/torus_zscores.txt.gz', col_names = T)
   
   print('Done.')
 }
