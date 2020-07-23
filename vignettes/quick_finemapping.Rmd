@@ -50,7 +50,8 @@ gwas[,c('chr','pos','beta','se','snp','pval','zscore')]
 Next, we must perform enrichment analysis with TORUS, which requires annotation files in `.bed` format. Use the `PrepareTorusFiles()` function, which takes the previous output, and a directory with bed files. Your bed file should contain only 3 columns (chr, start, end) and chromosomes should be just the number (no "chr"). Currently only hg19/b37 coordinates are accepted. You will get wrong results if you use hg38/other.
 
 ```{r}
-PrepareTorusFiles(gwas, bed_annotations = '/project2/xinhe/alan/Cancer/GERMLINE/ANNOTATIONS/TEST/')
+bed_annotations = system.file("extdata", "test_bed_dir/", package="finemappeR")
+PrepareTorusFiles(gwas, bed_annotations = bed_annotations)
 ```
 
 Now that the appropriate files have been generated (they are in .temp/), lets run TORUS. `RunTorus()` returns two things: enrichment level of each annotation in log2 units, and the posterior inclusion probability (PIP) of each SNP. These PIPs will be used as priors for finemapping.
@@ -89,7 +90,7 @@ susie_finemap_L1 <- RunFinemapping(sumstats = susie.df, bigSNP = bigSNP)
 gwas_finemapped <- merge_susie_sumstats(susie_results = susie_finemap_L1, sumstats = susie.df)
 ```
 
-Lets look at the final cleaned, and finemapped summary statistics. We see we have a new column called `susie_pip` which is the probability of being causal. Note that we ran SuSiE with L = 1 here, meaning we assumed there is at most 1 causal variant per SNP.
+Lets look at the final cleaned, and finemapped summary statistics. We see we have a new column called `susie_pip` which is the probability of being causal. Note that we ran SuSiE with L = 1 here, meaning we assumed there is at most 1 causal variant per SNP. 
 
 ```{r}
 gwas_finemapped[,c('chr','pos','beta','se','snp','pval','zscore','torus_pip','susie_pip')]
