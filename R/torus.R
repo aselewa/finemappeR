@@ -50,7 +50,7 @@ RunTorus <- function(TORUS=system.file('torus', package='finemappeR')){
   
   files <- list.files(path = 'prior/', pattern = '*.prior', full.names = T)
   res2 <- processx::run(command = 'cat', args=files)
-  snp_pip <- as_tibble(read.table(file = textConnection(res2$stdout),skip=1,header=F,stringsAsFactors = F))
+  snp_pip <- as_tibble(read.table(file = textConnection(res2$stdout),header=F,stringsAsFactors = F))
   colnames(snp_pip) <- c("snp","torus_pip")
   
   system('rm -rf prior/')
