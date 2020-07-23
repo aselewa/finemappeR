@@ -1,3 +1,3 @@
 [submodule "ext/torus"]
 	path = ext/torus
-	url = git@github.com:aselewa/torus.git
+	url = https://github.com/aselewa/torus.git
