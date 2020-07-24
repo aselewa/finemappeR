@@ -3,13 +3,12 @@
 #' @param cleaned_sumstats cleaned summary statistics from RunCleaner or other
 #' @param bed_annotation a directory containing annotations in bed format. The bed file must have three columns: chr, start, end. Chromosomes should be numeric (no "chr")
 #' and should be in hg19/b37 format. You will get wrong results if you use hg38 or other (reference panel is hg19).
-#' @return NULL (results are written to disk in ./.temp)
+#' @return location to two files: torus zscore file and annotation file
 #' @export
 PrepareTorusFiles <- function(cleaned_sumstats, bed_annotations){
   
   stopifnot(dir.exists(bed_annotations))
-  system('mkdir -p .temp')
-  
+
   annotations <- list.files(path = bed_annotations, pattern = '*.bed', full.names = T)
   
   if(length(annotations) == 0){
@@ -20,26 +19,33 @@ PrepareTorusFiles <- function(cleaned_sumstats, bed_annotations){
   cleaned.gwas.annots <- annotator(cleaned_sumstats, annotations = annotations)
   
   print('Writing files to temporary location..')
-  readr::write_tsv(x = cleaned.gwas.annots[,-c(1:6,8:12)], path = '.temp/torus_annotations.txt.gz', col_names = T)
-  readr::write_tsv(x = cleaned_sumstats[,c('snp','locus','zscore')], path = '.temp/torus_zscores.txt.gz', col_names = T)
+  annotation_file <- tempfile(fileext = '.txt.gz')
+  zscore_file <- tempfile(fileext = '.txt.gz')
+  readr::write_tsv(x = cleaned.gwas.annots[,-c(1:6,8:12)], path = annotation_file, col_names = T)
+  readr::write_tsv(x = cleaned_sumstats[,c('snp','locus','zscore')], path = zscore_file, col_names = T)
   
   print('Done.')
+  
+  return(list(torus_annot_file=annotation_file, torus_zscore_file=zscore_file))
 }
 
 #' @title RunTorus
 #' @description executes Torus
 #' @return list of enrichment results and PIP of each SNP (both tibbles)
 #' @export
-RunTorus <- function(TORUS=system.file('torus', package='finemappeR')){
+RunTorus <- function(torus_annot_file, torus_zscore_file, TORUS=system.file('torus', package='finemappeR')){
   
-  if(!dir.exists('.temp')){
+  if(!file.exists(torus_annot_file)){
     stop('Cannot find annotation files. Did you run PrepareTorusfiles?')
+  }
+  if(!file.exists(torus_zscore_file)){
+    stop('Cannot find zscore files. Did you run PrepareTorusfiles?')
   }
   
   args <- c('-d',
-            '.temp/torus_zscores.txt.gz', 
+            torus_zscore_file, 
             '-annot', 
-            '.temp/torus_annotations.txt.gz',
+            torus_annot_file,
             '--load_zval',
             '-dump_prior',
             'prior')

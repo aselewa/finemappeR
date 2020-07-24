@@ -144,15 +144,15 @@
 ## # ... with 7,590 more rows</code></pre>
 <p>Next, we must perform enrichment analysis with TORUS, which requires annotation files in <code>.bed</code> format. Use the <code><a href="../reference/PrepareTorusFiles.html">PrepareTorusFiles()</a></code> function, which takes the previous output, and a directory with bed files. Your bed file should contain only 3 columns (chr, start, end) and chromosomes should be just the number (no “chr”). Currently only hg19/b37 coordinates are accepted. You will get wrong results if you use hg38/other.</p>
 <div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="no">bed_annotations</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span>(<span class="st">"extdata"</span>, <span class="st">"test_bed_dir/"</span>, <span class="kw">package</span><span class="kw">=</span><span class="st">"finemappeR"</span>)
-<span class="fu"><a href="../reference/PrepareTorusFiles.html">PrepareTorusFiles</a></span>(<span class="no">gwas</span>, <span class="kw">bed_annotations</span> <span class="kw">=</span> <span class="no">bed_annotations</span>)</pre></body></html></div>
+<span class="no">torus.files</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/PrepareTorusFiles.html">PrepareTorusFiles</a></span>(<span class="no">gwas</span>, <span class="kw">bed_annotations</span> <span class="kw">=</span> <span class="no">bed_annotations</span>)</pre></body></html></div>
 <pre><code>## [1] "Annotating Snps.."
 ## [1] "Writing files to temporary location.."
 ## [1] "Done."</code></pre>
 <p>Now that the appropriate files have been generated (they are in .temp/), lets run TORUS. <code><a href="../reference/RunTorus.html">RunTorus()</a></code> returns two things: enrichment level of each annotation in log2 units, and the posterior inclusion probability (PIP) of each SNP. These PIPs will be used as priors for finemapping.</p>
-<div class="sourceCode" id="cb14"><html><body><pre class="r"><span class="no">torus.result</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/RunTorus.html">RunTorus</a></span>()</pre></body></html></div>
-<pre><code>## Running /tmp/RtmpU8Dqnt/temp_libpath21af1f99888d/finemappeR/torus -d \
-##   .temp/torus_zscores.txt.gz -annot .temp/torus_annotations.txt.gz \
-##   --load_zval -dump_prior prior
+<div class="sourceCode" id="cb14"><html><body><pre class="r"><span class="no">torus.result</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/RunTorus.html">RunTorus</a></span>(<span class="kw">torus_annot_file</span> <span class="kw">=</span> <span class="no">torus.files</span><span class="kw">[[</span><span class="fl">1</span>]], <span class="kw">torus_zscore_file</span> <span class="kw">=</span> <span class="no">torus.files</span><span class="kw">[[</span><span class="fl">2</span>]])</pre></body></html></div>
+<pre><code>## Running /tmp/Rtmp8OB23t/temp_libpathc39132959580/finemappeR/torus -d \
+##   /tmp/RtmpV78IY8/filec81933ed5a96.txt.gz -annot \
+##   /tmp/RtmpV78IY8/filec819b0e664c.txt.gz --load_zval -dump_prior prior
 ## Read in 2 loci, 7600 locus-SNP pairs ... 
 ## Loading annotations ... 
 ## Initializing ... 
@@ -170,7 +170,7 @@
 ##            testbed2.bed.1      0.002        -1.076      1.080</code></pre>
 <p>TORUS also gives us the uncertainty associated with whether each chunk contains a causal variant or not. We run <code><a href="../reference/RunTorusFDR.html">RunTorusFDR()</a></code> to get the probability of each chunk containing a causal variant. We can filter our chunks with low probability, thus saving us on computational time!</p>
 <div class="sourceCode" id="cb16"><html><body><pre class="r"><span class="no">torus.fdr</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/RunTorusFDR.html">RunTorusFDR</a></span>()</pre></body></html></div>
-<pre><code>## Running /tmp/RtmpU8Dqnt/temp_libpath21af1f99888d/finemappeR/torus -d \
+<pre><code>## Running /tmp/Rtmp8OB23t/temp_libpathc39132959580/finemappeR/torus -d \
 ##   .temp/torus_zscores.txt.gz -annot .temp/torus_annotations.txt.gz \
 ##   --load_zval -qtl
 ## Read in 2 loci, 7600 locus-SNP pairs ... 
@@ -192,20 +192,20 @@
 <div class="sourceCode" id="cb18"><html><body><pre class="r"><span class="no">susie.df</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/PrepareSusieData.html">PrepareSusieData</a></span>(<span class="kw">sumstats</span> <span class="kw">=</span> <span class="no">gwas</span>, <span class="kw">torus_pip</span> <span class="kw">=</span> <span class="no">torus.result</span>$<span class="no">snp_pip</span>, <span class="kw">torus_fdr</span> <span class="kw">=</span> <span class="no">torus.fdr</span>, <span class="kw">fdr_thresh</span> <span class="kw">=</span> <span class="fl">1</span>)</pre></body></html></div>
 <p>We see we have a new column called <code>torus_pip</code></p>
 <div class="sourceCode" id="cb19"><html><body><pre class="r"><span class="no">susie.df</span>[,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'chr'</span>,<span class="st">'pos'</span>,<span class="st">'beta'</span>,<span class="st">'se'</span>,<span class="st">'snp'</span>,<span class="st">'pval'</span>,<span class="st">'zscore'</span>,<span class="st">'torus_pip'</span>)]</pre></body></html></div>
-<pre><code>## # A tibble: 7,599 x 8
+<pre><code>## # A tibble: 7,600 x 8
 ##      chr   pos     beta     se snp                  pval   zscore torus_pip
 ##    &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;               &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
-##  1     1 13116 -0.0126  0.0190 rs201725126:1311~ 5.08e-1 -0.662   0.0000151
-##  2     1 13118 -0.0126  0.0190 rs200579949:1311~ 5.08e-1 -0.662   0.0000151
-##  3     1 13550  0.132   0.112  1:13550:G:A       2.41e-1  1.17    0.0000151
-##  4     1 14604  0.0222  0.0186 1:14604:A:G       2.33e-1  1.19    0.0000151
-##  5     1 14930  0.00247 0.0141 rs75454623:14930~ 8.60e-1  0.176   0.0000151
-##  6     1 14933 -0.0199  0.0388 rs199856693:1493~ 6.07e-1 -0.514   0.0000151
-##  7     1 15211  0.00002 0.0162 rs78601809:15211~ 9.99e-1  0.00123 0.0000151
-##  8     1 15644  0.364   0.104  1:15644:G:A       4.84e-4  3.49    0.0000151
-##  9     1 15774  0.265   0.0935 rs374029747:1577~ 4.63e-3  2.83    0.0000151
-## 10     1 15777 -0.0742  0.0638 1:15777:A:G       2.45e-1 -1.16    0.0000151
-## # ... with 7,589 more rows</code></pre>
+##  1     1 13110 -0.0207  0.0323 1:13110:G:A      0.522    -0.639     2.00e-6
+##  2     1 13116 -0.0126  0.0190 rs201725126:131~ 0.508    -0.662     1.51e-5
+##  3     1 13118 -0.0126  0.0190 rs200579949:131~ 0.508    -0.662     1.51e-5
+##  4     1 13550  0.132   0.112  1:13550:G:A      0.241     1.17      1.51e-5
+##  5     1 14604  0.0222  0.0186 1:14604:A:G      0.233     1.19      1.51e-5
+##  6     1 14930  0.00247 0.0141 rs75454623:1493~ 0.860     0.176     1.51e-5
+##  7     1 14933 -0.0199  0.0388 rs199856693:149~ 0.607    -0.514     1.51e-5
+##  8     1 15211  0.00002 0.0162 rs78601809:1521~ 0.999     0.00123   1.51e-5
+##  9     1 15644  0.364   0.104  1:15644:G:A      0.000484  3.49      1.51e-5
+## 10     1 15774  0.265   0.0935 rs374029747:157~ 0.00463   2.83      1.51e-5
+## # ... with 7,590 more rows</code></pre>
 <p>With this data frame, we can perform finemapping. We use <code><a href="../reference/RunFinemapping.html">RunFinemapping()</a></code> to get out results. This will be quite slow if chunks contain many SNPs( O(n^2) where n is # of SNPs). I am working on ways to parallize this step (maybe you can help!)</p>
 <div class="sourceCode" id="cb21"><html><body><pre class="r"><span class="no">susie_finemap_L1</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/RunFinemapping.html">RunFinemapping</a></span>(<span class="kw">sumstats</span> <span class="kw">=</span> <span class="no">susie.df</span>, <span class="kw">bigSNP</span> <span class="kw">=</span> <span class="no">bigSNP</span>)</pre></body></html></div>
 <pre><code>## [1] "Finemapping chunks.. 1 of 2"
@@ -214,20 +214,20 @@
 <div class="sourceCode" id="cb23"><html><body><pre class="r"><span class="no">gwas_finemapped</span> <span class="kw">&lt;-</span> <span class="fu">merge_susie_sumstats</span>(<span class="kw">susie_results</span> <span class="kw">=</span> <span class="no">susie_finemap_L1</span>, <span class="kw">sumstats</span> <span class="kw">=</span> <span class="no">susie.df</span>)</pre></body></html></div>
 <p>Lets look at the final cleaned, and finemapped summary statistics. We see we have a new column called <code>susie_pip</code> which is the probability of being causal. Note that we ran SuSiE with L = 1 here, meaning we assumed there is at most 1 causal variant per SNP.</p>
 <div class="sourceCode" id="cb24"><html><body><pre class="r"><span class="no">gwas_finemapped</span>[,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'chr'</span>,<span class="st">'pos'</span>,<span class="st">'beta'</span>,<span class="st">'se'</span>,<span class="st">'snp'</span>,<span class="st">'pval'</span>,<span class="st">'zscore'</span>,<span class="st">'torus_pip'</span>,<span class="st">'susie_pip'</span>)]</pre></body></html></div>
-<pre><code>## # A tibble: 7,599 x 9
+<pre><code>## # A tibble: 7,600 x 9
 ##      chr   pos     beta     se snp        pval   zscore torus_pip susie_pip
 ##    &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
-##  1     1 13116 -0.0126  0.0190 rs2017~ 5.08e-1 -0.662   0.0000151         0
-##  2     1 13118 -0.0126  0.0190 rs2005~ 5.08e-1 -0.662   0.0000151         0
-##  3     1 13550  0.132   0.112  1:1355~ 2.41e-1  1.17    0.0000151         0
-##  4     1 14604  0.0222  0.0186 1:1460~ 2.33e-1  1.19    0.0000151         0
-##  5     1 14930  0.00247 0.0141 rs7545~ 8.60e-1  0.176   0.0000151         0
-##  6     1 14933 -0.0199  0.0388 rs1998~ 6.07e-1 -0.514   0.0000151         0
-##  7     1 15211  0.00002 0.0162 rs7860~ 9.99e-1  0.00123 0.0000151         0
-##  8     1 15644  0.364   0.104  1:1564~ 4.84e-4  3.49    0.0000151         0
-##  9     1 15774  0.265   0.0935 rs3740~ 4.63e-3  2.83    0.0000151         0
-## 10     1 15777 -0.0742  0.0638 1:1577~ 2.45e-1 -1.16    0.0000151         0
-## # ... with 7,589 more rows</code></pre>
+##  1     1 13110 -0.0207  0.0323 1:1311~ 5.22e-1 -0.639     2.00e-6         0
+##  2     1 13116 -0.0126  0.0190 rs2017~ 5.08e-1 -0.662     1.51e-5         0
+##  3     1 13118 -0.0126  0.0190 rs2005~ 5.08e-1 -0.662     1.51e-5         0
+##  4     1 13550  0.132   0.112  1:1355~ 2.41e-1  1.17      1.51e-5         0
+##  5     1 14604  0.0222  0.0186 1:1460~ 2.33e-1  1.19      1.51e-5         0
+##  6     1 14930  0.00247 0.0141 rs7545~ 8.60e-1  0.176     1.51e-5         0
+##  7     1 14933 -0.0199  0.0388 rs1998~ 6.07e-1 -0.514     1.51e-5         0
+##  8     1 15211  0.00002 0.0162 rs7860~ 9.99e-1  0.00123   1.51e-5         0
+##  9     1 15644  0.364   0.104  1:1564~ 4.84e-4  3.49      1.51e-5         0
+## 10     1 15774  0.265   0.0935 rs3740~ 4.63e-3  2.83      1.51e-5         0
+## # ... with 7,590 more rows</code></pre>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
