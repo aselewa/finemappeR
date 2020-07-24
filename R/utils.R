@@ -26,7 +26,7 @@ clean_sumstats <- function(sumstats, cols.to.keep){
   
   # drop XY chromosomes
   clean.sumstats <- clean.sumstats[!(clean.sumstats$chr %in% c("X","Y")), ]
-  
+  print('X,Y dropped')
   # make chromosomes integers
   clean.sumstats$chr <- as.integer(clean.sumstats$chr)
   
@@ -34,18 +34,21 @@ clean_sumstats <- function(sumstats, cols.to.keep){
   zscore <- clean.sumstats$beta/clean.sumstats$se
   clean.sumstats['zscore'] <- zscore
   clean.sumstats <- clean.sumstats[!is.na(zscore),]
+  print('zscore computed')
   
   # Keep SNPs only, no indels
   nucs <- c('A','C','T','G')
   bol <- (clean.sumstats$a0 %in% nucs) & (clean.sumstats$a1 %in% nucs)
   clean.sumstats <- clean.sumstats[bol,]
   
+  print('indels dropped')
   # sort by chromosome and position
   clean.sumstats <- clean.sumstats[order(clean.sumstats$chr, clean.sumstats$pos), ]
   
   # drop duplicate SNPs
   chrpos <- paste0(clean.sumstats$chr, '_', clean.sumstats$pos)
   clean.sumstats <- clean.sumstats[!duplicated(chrpos), ]
+  print('duplicate snps removed')
   
   return(clean.sumstats)
 }
