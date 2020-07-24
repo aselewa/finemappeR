@@ -38,8 +38,9 @@ clean_sumstats <- function(sumstats, cols.to.keep){
   
   # Keep SNPs only, no indels
   nucs <- c('A','C','T','G')
-  bol <- (clean.sumstats$a0 %in% nucs) & (clean.sumstats$a1 %in% nucs)
-  clean.sumstats <- clean.sumstats[bol,]
+  bola1 <- (clean.sumstats$a0 %in% nucs) 
+  bola2 <- (clean.sumstats$a1 %in% nucs)
+  clean.sumstats <- clean.sumstats[bola1 & bola2,]
   
   print('indels dropped')
   # sort by chromosome and position
