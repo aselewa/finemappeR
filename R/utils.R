@@ -36,6 +36,10 @@ clean_sumstats <- function(sumstats, cols.to.keep){
   clean.sumstats <- clean.sumstats[!is.na(zscore),]
   print('zscore computed')
   
+  # convert alleles to upper case
+  clean.sumstats$a0 <- toupper(clean.sumstats$a0)
+  clena.sumstats$a1 <- toupper(clean.sumstats$a1)
+  
   # Keep SNPs only, no indels
   nucs <- c('A','C','T','G')
   bola1 <- (clean.sumstats$a0 %in% nucs) 
