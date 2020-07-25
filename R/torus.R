@@ -8,7 +8,8 @@
 PrepareTorusFiles <- function(cleaned_sumstats, bed_annotations){
   
   stopifnot(dir.exists(bed_annotations))
-
+  system('mkdir -p torus_files')
+  
   annotations <- list.files(path = bed_annotations, pattern = '*.bed', full.names = T)
   
   if(length(annotations) == 0){
@@ -19,14 +20,13 @@ PrepareTorusFiles <- function(cleaned_sumstats, bed_annotations){
   cleaned.gwas.annots <- annotator(cleaned_sumstats, annotations = annotations)
   
   print('Writing files to temporary location..')
-  annotation_file <- tempfile(fileext = '.txt.gz')
-  zscore_file <- tempfile(fileext = '.txt.gz')
-  readr::write_tsv(x = cleaned.gwas.annots[,-c(1:6,8:12)], path = annotation_file, col_names = T)
-  readr::write_tsv(x = cleaned_sumstats[,c('snp','locus','zscore')], path = zscore_file, col_names = T)
+
+  readr::write_tsv(x = cleaned.gwas.annots[,-c(1:6,8:12)], path = 'torus_files/torus_annotations.txt.gz', col_names = T)
+  readr::write_tsv(x = cleaned_sumstats[,c('snp','locus','zscore')], path = 'torus_files/torus_zscore.txt.gz', col_names = T)
   
   print('Done.')
   
-  return(list(torus_annot_file=annotation_file, torus_zscore_file=zscore_file))
+  return(list(torus_annot_file='torus_files/torus_annotations.txt.gz', torus_zscore_file='torus_files/torus_zscore.txt.gz'))
 }
 
 #' @title RunTorus
@@ -71,16 +71,16 @@ RunTorus <- function(torus_annot_file, torus_zscore_file, TORUS=system.file('tor
 #' @description Runs Torus in FDR mode to estimate the FDR of each chunk containing a causal variant
 #' @return tibble containing fdr of each LD block/chunk
 #' @export
-RunTorusFDR <- function(TORUS=system.file('torus', package='finemappeR')){
+RunTorusFDR <- function(torus_annot_file, torus_zscore_file, TORUS=system.file('torus', package='finemappeR')){
   
   if(!dir.exists('.temp')){
     stop('Cannot find annotation files. Did you run PrepareTorusfiles?')
   }
   
   args <- c('-d',
-            '.temp/torus_zscores.txt.gz', 
+            torus_zscore_file, 
             '-annot', 
-            '.temp/torus_annotations.txt.gz',
+            torus_annot_file,
             '--load_zval',
             '-qtl')
   
