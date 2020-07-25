@@ -51,12 +51,14 @@ RunTorus <- function(torus_annot_file, torus_zscore_file, TORUS=system.file('tor
             'prior')
   
   res <- processx::run(command = TORUS, args = args, echo_cmd = TRUE, echo = TRUE)
-  enrich <-  vroom::vroom(textConnection(res$stdout),skip = 1, col_names = F)
+  print('Saving enrichments to dataframe..')
+  enrich <- as_tibble(read.table(file = textConnection(res$stdout),skip=1,header=F,stringsAsFactors = F))
   colnames(enrich) <- c("term", "estimate", "low", "high")
   
+  print('Extracting prior probabilities from Torus..')
   files <- list.files(path = 'prior/', pattern = '*.prior', full.names = T)
-  res2 <- processx::run(command = 'cat', args=files)
-  snp_pip <- vroom::vroom(textConnection(res2$stdout), col_names = F)
+  system(paste0('cat ', files, ' > prior/allchunks.txt'))
+  snp_pip <- vroom::vroom('prior/allchunks.txt', col_names = F)
   colnames(snp_pip) <- c("snp","torus_pip")
   
   system('rm -rf prior/')
