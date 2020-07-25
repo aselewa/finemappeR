@@ -56,7 +56,7 @@ RunTorus <- function(torus_annot_file, torus_zscore_file, TORUS=system.file('tor
   
   files <- list.files(path = 'prior/', pattern = '*.prior', full.names = T)
   res2 <- processx::run(command = 'cat', args=files)
-  snp_pip <- vroom::vroom(textConnection(res2$stdout), col_names = F))
+  snp_pip <- vroom::vroom(textConnection(res2$stdout), col_names = F)
   colnames(snp_pip) <- c("snp","torus_pip")
   
   system('rm -rf prior/')
