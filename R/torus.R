@@ -8,9 +8,10 @@
 PrepareTorusFiles <- function(cleaned_sumstats, bed_annotations){
   
   stopifnot(dir.exists(bed_annotations))
-  system('mkdir -p torus_files')
-  system('ls -ltr')
-  
+  currDir <- getwd()
+  torus_files_path <- paste0(currDir, '/torus_files')
+  system(paste0('mkdir -p ', torus_files_path))
+
   annotations <- list.files(path = bed_annotations, pattern = '*.bed', full.names = T)
   
   if(length(annotations) == 0){
@@ -21,12 +22,15 @@ PrepareTorusFiles <- function(cleaned_sumstats, bed_annotations){
   cleaned.gwas.annots <- annotator(cleaned_sumstats, annotations = annotations)
   
   print('Writing files to temporary location..')
-  readr::write_tsv(x = cleaned.gwas.annots[,-c(1:6,8:12)], path = 'torus_files/torus_annotations.txt.gz', col_names = T)
-  readr::write_tsv(x = cleaned_sumstats[,c('snp','locus','zscore')], path = 'torus_files/torus_zscore.txt.gz', col_names = T)
+  torus_annot_file = paste0(torus_files_path,'/torus_annotations.txt.gz')
+  torus_zscore_file = paste0(torus_files_path,'/torus_zscore.txt.gz')
+  
+  readr::write_tsv(x = cleaned.gwas.annots[,-c(1:6,8:12)], path = torus_annot_file, col_names = T)
+  readr::write_tsv(x = cleaned_sumstats[,c('snp','locus','zscore')], path = torus_zscore_file, col_names = T)
   
   print('Done.')
   
-  return(list(torus_annot_file='torus_files/torus_annotations.txt.gz', torus_zscore_file='torus_files/torus_zscore.txt.gz'))
+  return(list(torus_annot_file=torus_annot_file, torus_zscore_file=torus_zscore_file))
 }
 
 #' @title RunTorus
