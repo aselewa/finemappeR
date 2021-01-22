@@ -56,8 +56,10 @@ RunTorus <- function(torus_annot_file, torus_zscore_file, TORUS=system.file('tor
   
   print('Extracting prior probabilities from Torus..')
   files <- list.files(path = 'prior/', pattern = '*.prior', full.names = T)
-  system(paste0('cat ', files, ' > prior/allchunks.txt'))
-  snp_pip <- suppressMessages(vroom::vroom('prior/allchunks.txt', col_names = F, delim = " "))
+  files.str <- paste0(files.str, collapse = " ")
+  
+  system(paste0('cat ', files.str, ' > prior/allchunks.txt'))
+  snp_pip <- suppressMessages(vroom::vroom('prior/allchunks.txt', col_names = F, delim = "  "))
   colnames(snp_pip) <- c("snp","torus_pip")
   
   system('rm -rf prior/')
