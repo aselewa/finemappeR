@@ -8,10 +8,13 @@ RunCleaner <- function(sumstats, ColsToKeep, bigSNP){
  
   print('Loading summary statistics...')
   
-  sumstats <- vroom::vroom(sumstats, col_names = TRUE)
+  if(is.character(sumstats) & length(sumstats) == 1){
+ 
+   sumstats <- vroom::vroom(sumstats, col_names = TRUE)
+  
+  }
   
   print('Cleaning summary statistics..')
-  
   cleaned_sumstats <- clean_sumstats(sumstats, ColsToKeep)
   
   print('Matching to reference panel...')
